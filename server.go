@@ -20,7 +20,7 @@ func main() {
 	log.Println("Starting Eyevinn simple origin store=" + OriginStoreDir)
 
 	http.HandleFunc("/", healthCheckHandler)
-	http.HandleFunc("/ingest/", pushHandler)
+	http.HandleFunc("/ingest/", pushAndRemoveHandler)
 	http.HandleFunc("/live/", pullHandler)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
@@ -30,26 +30,14 @@ func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "OK")
 }
 
-func pushHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "PUT" || r.Method == "POST" {
-		log.Println("PUT: " + r.URL.String())
-		destpath := strings.Replace(r.URL.String(), "ingest", "live", 1)
-		dir, file := filepath.Split(filepath.Join(OriginStoreDir, destpath))
-		if dir != "" {
-			os.MkdirAll(dir, os.ModePerm)
-		}
-		destfile, err := os.Create(filepath.Join(dir, file))
-		if err != nil {
-			w.WriteHeader(500)
-			w.Write([]byte(err.Error()))
-		}
-		n, err := io.Copy(destfile, r.Body)
-		if err != nil {
-			w.WriteHeader(500)
-			w.Write([]byte(err.Error()))
-		}
-		log.Printf("%s: %d bytes written.\n", destpath, n)
-		w.WriteHeader(204)
+func pushAndRemoveHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "PUT":
+		upload(w, r)
+	case "POST":
+		upload(w, r)
+	case "DELETE":
+		delete(w, r)
 	}
 }
 
@@ -59,4 +47,40 @@ func pullHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("Serving file: " + filepath.Join(OriginStoreDir, r.URL.String()))
 		http.ServeFile(w, r, filepath.Join(OriginStoreDir, r.URL.String()))
 	}
+}
+
+func upload(w http.ResponseWriter, r *http.Request) {
+	log.Println("PUT: " + r.URL.String())
+	destpath := strings.Replace(r.URL.String(), "ingest", "live", 1)
+	dir, file := filepath.Split(filepath.Join(OriginStoreDir, destpath))
+	if dir != "" {
+		os.MkdirAll(dir, os.ModePerm)
+	}
+	destfile, err := os.Create(filepath.Join(dir, file))
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	n, err := io.Copy(destfile, r.Body)
+	if err != nil {
+		w.WriteHeader(500)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	log.Printf("%s: %d bytes written.\n", destpath, n)
+	w.WriteHeader(204)
+}
+
+func delete(w http.ResponseWriter, r *http.Request) {
+	log.Println("DELETE: " + r.URL.String())
+	path := strings.Replace(r.URL.String(), "ingest", "live", 1)
+	file := filepath.Join(OriginStoreDir, path)
+	err := os.Remove(file)
+	if err != nil {
+		w.WriteHeader(404)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	w.WriteHeader(204)
 }

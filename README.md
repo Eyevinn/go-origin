@@ -5,10 +5,22 @@ A simplistic live streaming origin written in Go
 
 ## Example
 
+Upload:
+
 ```
 curl -v -X PUT -H "Content-Type: application/octet-stream" --data-binary '@testmedia/live/test/2M/fileSequence422.mp4' http://localhost:8080/ingest/test2/2M/fileSequence422.mp4
+```
 
+Access:
+
+```
 curl -v http://localhost:8080/live/test2/2M/fileSequence422.mp4
+```
+
+Delete:
+
+```
+curl -v -X DELETE http://localhost:8080/ingest/test2/2M/fileSequence422.mp4
 ```
 
 ## Build and Run
