@@ -13,7 +13,7 @@ jobs:
         with:
           image: go-origin
           registry: 590877988961.dkr.ecr.eu-north-1.amazonaws.com
-          dockerfile: dockerfile
+          dockerfile: Dockerfile
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
