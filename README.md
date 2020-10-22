@@ -32,4 +32,5 @@ $ ./go-origin
 2020/10/21 14:29:32 Starting Eyevinn simple origin store=./testmedia/
 ```
 
-Set environment variable `MEDIAPATH` if you don't want to use the default `./testmedia/`
+Set environment variable `MEDIAPATH` if you don't want to use the default `./testmedia/`.
+Set environment variable `PORT` to specify what port to listen to. Default is 8080.

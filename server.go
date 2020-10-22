@@ -23,7 +23,12 @@ func main() {
 	http.HandleFunc("/ingest/", pushAndRemoveHandler)
 	http.HandleFunc("/live/", pullHandler)
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Println("Listening on port " + port)
+	log.Fatal(http.ListenAndServe(":" + port, nil))
 }
 
 func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
