@@ -1,0 +1,19 @@
+name: Docker Image Build & Push
+on:
+  push:
+    tags: '*'
+
+jobs:
+  run-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - uses: mr-smithers-excellent/docker-build-push@v1.0
+        with:
+          image: go-origin
+          registry: 590877988961.dkr.ecr.eu-north-1.amazonaws.com
+          dockerfile: dockerfile
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
